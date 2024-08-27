@@ -20,76 +20,27 @@ public class NoteController {
     @Autowired
     private NoteService noteService;
 
-    /*@PostMapping
+    @PostMapping
     public Note createNote(@RequestBody String content,
                            @AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
         System.out.println("USER DETAILS: " + username);
-        if (!isValidNoteContent(content)) {
-            throw new IllegalArgumentException("Invalid note content");
-        }
-        return noteService.createNoteForUser(username, sanitizeContent(content));
-    }*/
-
-    @PostMapping
-    public ResponseEntity<?> createNote(@RequestBody String content,
-                                        @AuthenticationPrincipal UserDetails userDetails) {
-        if (!isValidNoteContent(content)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Invalid note content. Content contains disallowed characters or patterns.");
-        }
-        String username = userDetails.getUsername();
-        Note savedNote = noteService.createNoteForUser(username, sanitizeContent(content));
-        return ResponseEntity.ok(savedNote);
+        return noteService.createNoteForUser(username, content);
     }
 
-    /*@GetMapping
+    @GetMapping
     public List<Note> getUserNotes(@AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
         System.out.println("USER DETAILS: " + username);
-        List<Note> notes = noteService.getNotesForUser(username);
-        return notes.stream()
-                .map(note -> {
-                    note.setContent(StringEscapeUtils.escapeHtml4(note.getContent()));
-                    return note;
-                })
-                .collect(Collectors.toList());
-    }*/
-
-    @GetMapping
-    public ResponseEntity<List<Note>> getUserNotes(@AuthenticationPrincipal UserDetails userDetails) {
-        String username = userDetails.getUsername();
-        List<Note> notes = noteService.getNotesForUser(username);
-        return ResponseEntity.ok(notes.stream()
-                .map(note -> {
-                    note.setContent(StringEscapeUtils.escapeHtml4(note.getContent()));
-                    return note;
-                })
-                .collect(Collectors.toList()));
+        return noteService.getNotesForUser(username);
     }
 
-    /*@PutMapping("/{noteId}")
+    @PutMapping("/{noteId}")
     public Note updateNote(@PathVariable Long noteId,
                            @RequestBody String content,
                            @AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
-        if (!isValidNoteContent(content)) {
-            throw new IllegalArgumentException("Invalid note content");
-        }
-        return noteService.updateNoteForUser(noteId, sanitizeContent(content), username);
-    }*/
-
-    @PutMapping("/{noteId}")
-    public ResponseEntity<?> updateNote(@PathVariable Long noteId,
-                                        @RequestBody String content,
-                                        @AuthenticationPrincipal UserDetails userDetails) {
-        if (!isValidNoteContent(content)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Invalid note content. Content contains disallowed characters or patterns.");
-        }
-        String username = userDetails.getUsername();
-        Note updatedNote = noteService.updateNoteForUser(noteId, sanitizeContent(content), username);
-        return ResponseEntity.ok(updatedNote);
+        return noteService.updateNoteForUser(noteId, content, username);
     }
 
     @DeleteMapping("/{noteId}")
@@ -97,16 +48,6 @@ public class NoteController {
                            @AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
         noteService.deleteNoteForUser(noteId, username);
-    }
-
-    private boolean isValidNoteContent(String content) {
-        // Basic check to prevent script injections
-        return content != null && !content.matches("(?i).*<script.*?>.*</script>.*");
-    }
-
-    private String sanitizeContent(String content) {
-        // Use Apache Commons Text to escape HTML entities
-        return StringEscapeUtils.escapeHtml4(content);
     }
 }
 
