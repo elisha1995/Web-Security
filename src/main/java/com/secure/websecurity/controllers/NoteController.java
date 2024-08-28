@@ -20,7 +20,7 @@ public class NoteController {
     @Autowired
     private NoteService noteService;
 
-    @PostMapping
+    @PostMapping("/create")
     public Note createNote(@RequestBody String content,
                            @AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
@@ -28,7 +28,7 @@ public class NoteController {
         return noteService.createNoteForUser(username, content);
     }
 
-    @GetMapping
+    @GetMapping("/getNotes")
     public List<Note> getUserNotes(@AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
         System.out.println("USER DETAILS: " + username);
